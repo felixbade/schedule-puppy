@@ -74,6 +74,6 @@ def get_time_until_next_daily():
 
 while True:
     t = get_time_until_next_daily()
-    print('Sleeping', t)
+    print('Sleeping for', t)
     time.sleep(t)
     sendScheduleForTomorrow()
