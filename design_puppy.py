@@ -1,3 +1,5 @@
+import time
+
 from ics import Calendar
 from ics.timeline import Timeline
 import arrow
@@ -6,14 +8,16 @@ import requests
 
 from secret import calendar_url, tg_token, tg_chat
 
-calendar = Calendar(requests.get(calendar_url).text)
-events_on = Timeline(calendar).on(arrow.now().shift(days=5))
-
+tz = 'Europe/Helsinki'
 
 # iCalendar
 
+def get_events_tomorrow():
+    calendar = Calendar(requests.get(calendar_url).text)
+    return Timeline(calendar).on(arrow.now().shift(days=1))
+
 def arrow_to_local_str(time):
-    return time.to('EEST').strftime('%H:%M')
+    return time.to(tz).strftime('%H:%M')
 
 def event_time_to_tg(event):
     event_time = arrow_to_local_str(event.begin)
@@ -32,9 +36,6 @@ def event_to_tg(event):
     text += event.name
     return text
 
-for event in events_on:
-    print(event_to_tg(event))
-    print()
 
 
 # Telegram
@@ -50,3 +51,27 @@ def sendMessage(chat_id, text):
 
 def sendMessageToGroup(text):
     sendMessage(tg_chat, text)
+
+
+
+# Scheduler
+
+def sendScheduleForTomorrow():
+    text = 'Schedule for tomorrow 😊'
+    for event in get_events_tomorrow():
+        text += '\n\n'
+        text += event_to_tg(event)
+    sendMessageToGroup(text)
+
+def get_time_until_next_daily():
+    now = arrow.now(tz)
+    posting = now.replace(hour=18, minute=0, second=0, microsecond=0)
+    if now > posting:
+        posting = posting.shift(days=1)
+    return (posting - now).total_seconds()
+
+
+
+while True:
+    time.sleep(get_time_until_next_daily())
+    sendScheduleForTomorrow()
