@@ -46,7 +46,7 @@ def getUpdates(offset):
 
 def sendMessage(chat_id, text):
     url = 'https://api.telegram.org/bot%s/sendMessage' % tg_token
-    data = {'chat_id': chat_id, 'text': text}
+    data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown'}
     requests.post(url, data)
 
 def sendMessageToGroup(text):
@@ -57,11 +57,16 @@ def sendMessageToGroup(text):
 # Scheduler
 
 def sendScheduleForTomorrow():
-    text = 'Schedule for tomorrow 😊'
-    for event in get_events_tomorrow():
-        text += '\n\n'
-        text += event_to_tg(event)
-    sendMessageToGroup(text)
+    events = list(get_events_tomorrow())
+    if not events:
+        print('No events for tomorrow, skipping messge')
+    else:
+        text = 'Schedule for tomorrow 😊'
+        for event in events:
+            text += '\n\n'
+            text += event_to_tg(event)
+        sendMessageToGroup(text)
+        print('Sent schedule to the group', tg_chat)
 
 def get_time_until_next_daily():
     now = arrow.now(tz)
