@@ -70,7 +70,7 @@ def sendScheduleForTomorrow():
 
 def get_time_until_next_daily():
     now = arrow.now(tz)
-    posting = now.replace(hour=18, minute=0, second=0, microsecond=0)
+    posting = now.replace(hour=18, minute=0, second=1, microsecond=500000)
     if now > posting:
         posting = posting.shift(days=1)
     return (posting - now).total_seconds()
