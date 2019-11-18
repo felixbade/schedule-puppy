@@ -42,7 +42,12 @@ def event_to_tg(event):
     if event.location:
         rows.append('📍 ' + event.location)
 
-    rows.append('👉 ' + event.name)
+    busy = not event.transparent
+    if busy:
+        rows.append('👉 ' + event.name)
+    else:
+        rows.append('🏝 ' + event.name)
+
     return '\n'.join(rows)
 
 
