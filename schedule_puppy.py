@@ -26,15 +26,15 @@ def event_time_to_tg(event):
     return event_time
 
 def event_to_tg(event):
-    text = event_time_to_tg(event)
+    rows = []
+    if not event.all_day:
+        rows.append(event_time_to_tg(event))
+
     if event.location:
-        text += '\n'
-        text += '📍 '
-        text += event.location
-    text += '\n'
-    text += '👉 '
-    text += event.name
-    return text
+        rows.append('📍 ' + event.location)
+
+    rows.append('👉 ' + event.name)
+    return '\n'.join(rows)
 
 
 
