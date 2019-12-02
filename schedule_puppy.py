@@ -56,24 +56,24 @@ def event_to_tg(event):
 
 
 # Telegram
-def getUpdates(offset):
+def get_updates(offset):
     url = 'https://api.telegram.org/bot%s/getUpdates?offset=%d' % (tg_token, offset)
     response = requests.get(url).json()
     return response['result']
 
-def sendMessage(chat_id, text):
+def send_message(chat_id, text):
     url = 'https://api.telegram.org/bot%s/sendMessage' % tg_token
     data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown'}
     requests.post(url, data)
 
-def sendMessageToGroup(text):
-    sendMessage(tg_chat, text)
+def send_message_to_group(text):
+    send_message(tg_chat, text)
 
 
 
 # Scheduler
 
-def sendScheduleForTomorrow():
+def send_schedule_for_tomorrow():
     events = get_events_tomorrow()
     if not events:
         print('No events for tomorrow, skipping messge')
@@ -82,7 +82,7 @@ def sendScheduleForTomorrow():
         for event in events:
             text += '\n\n'
             text += event_to_tg(event)
-        sendMessageToGroup(text)
+        send_message_to_group(text)
         print('Sent schedule to the group', tg_chat)
 
 def get_time_until_next_daily():
@@ -98,4 +98,4 @@ while True:
     t = get_time_until_next_daily()
     print('Sleeping for', t)
     time.sleep(t)
-    sendScheduleForTomorrow()
+    send_schedule_for_tomorrow()
