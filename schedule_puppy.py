@@ -48,6 +48,9 @@ def event_to_tg(event):
     else:
         rows.append('🏝 ' + event.name)
 
+    if event.description:
+        rows.append('📝 ' + event.description)
+
     return '\n'.join(rows)
 
 
