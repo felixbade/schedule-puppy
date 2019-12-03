@@ -6,7 +6,8 @@ import arrow
 from datetime import timedelta
 import requests
 
-from secret import calendar_url, tg_token, tg_chat
+from telegram import send_message, get_updates
+from secret import calendar_url, tg_chat
 
 tz = 'Europe/Helsinki' # Should be the same as the calendar time zone
 
@@ -55,22 +56,6 @@ def event_to_tg(event):
 
 
 
-# Telegram
-def get_updates(offset):
-    url = 'https://api.telegram.org/bot%s/getUpdates?offset=%d' % (tg_token, offset)
-    response = requests.get(url).json()
-    return response['result']
-
-def send_message(chat_id, text):
-    url = 'https://api.telegram.org/bot%s/sendMessage' % tg_token
-    data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown'}
-    requests.post(url, data)
-
-def send_message_to_group(text):
-    send_message(tg_chat, text)
-
-
-
 # Scheduler
 
 def send_schedule_for_tomorrow():
@@ -82,7 +67,7 @@ def send_schedule_for_tomorrow():
         for event in events:
             text += '\n\n'
             text += event_to_tg(event)
-        send_message_to_group(text)
+        send_message(tg_chat, text)
         print('Sent schedule to the group', tg_chat)
 
 def get_time_until_next_daily():
