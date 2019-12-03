@@ -12,11 +12,8 @@ from config import tz
 
 # iCalendar
 
-def get_events_tomorrow():
+def get_events_between(tomorrow_begin, tomorrow_end):
     calendar = Calendar(requests.get(calendar_url).text)
-    now = arrow.now(tz)
-    tomorrow_begin = now.replace(hour=0, minute=0, second=0, microsecond=0).shift(days=1)
-    tomorrow_end = tomorrow_begin.shift(days=1)
     events = []
     for event in Timeline(calendar):
         starts_tomorrow = ((event.begin >= tomorrow_begin) and (event.begin < tomorrow_end))
@@ -29,14 +26,22 @@ def get_events_tomorrow():
 
 # Scheduler
 
-def send_schedule_for_tomorrow():
-    events = get_events_tomorrow()
+def send_schedule_for_day_in(days):
+    now = arrow.now(tz)
+    tomorrow_begin = now.replace(hour=0, minute=0, second=0, microsecond=0).shift(days=days)
+    tomorrow_end = tomorrow_begin.shift(days=1)
+
+    events = get_events_between(tomorrow_begin, tomorrow_end)
+
     if not events:
         print('No events for tomorrow, skipping messge')
     else:
-        message = format_events_to_message(events)
+        message = format_events_to_message(events, tomorrow_begin)
         send_message(tg_chat, message)
         print('Sent schedule to the group', tg_chat)
+
+def send_schedule_for_tomorrow():
+    send_schedule_for_day_in(1)
 
 def get_time_until_next_daily():
     now = arrow.now(tz)
