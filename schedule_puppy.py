@@ -3,13 +3,12 @@ import time
 from ics import Calendar
 from ics.timeline import Timeline
 import arrow
-from datetime import timedelta
 import requests
 
 from telegram import send_message, get_updates
+from event_message_formatting import format_events_to_message
 from secret import calendar_url, tg_chat
-
-tz = 'Europe/Helsinki' # Should be the same as the calendar time zone
+from config import tz
 
 # iCalendar
 
@@ -26,34 +25,6 @@ def get_events_tomorrow():
             events.append(event)
     return events
 
-def arrow_to_local_str(time):
-    return time.to(tz).strftime('%H:%M')
-
-def event_time_to_tg(event):
-    event_time = arrow_to_local_str(event.begin)
-    if event.duration > timedelta(minutes=15):
-        event_time += '–' + arrow_to_local_str(event.end)
-    return event_time
-
-def event_to_tg(event):
-    rows = []
-    if not event.all_day:
-        rows.append(event_time_to_tg(event))
-
-    if event.location:
-        rows.append('📍 ' + event.location)
-
-    busy = not event.transparent
-    if busy:
-        rows.append('👉 ' + event.name)
-    else:
-        rows.append('🏝 ' + event.name)
-
-    if event.description:
-        rows.append('ℹ️ ' + event.description)
-
-    return '\n'.join(rows)
-
 
 
 # Scheduler
@@ -63,11 +34,8 @@ def send_schedule_for_tomorrow():
     if not events:
         print('No events for tomorrow, skipping messge')
     else:
-        text = 'Schedule for tomorrow 😊'
-        for event in events:
-            text += '\n\n'
-            text += event_to_tg(event)
-        send_message(tg_chat, text)
+        message = format_events_to_message(events)
+        send_message(tg_chat, message)
         print('Sent schedule to the group', tg_chat)
 
 def get_time_until_next_daily():
@@ -76,7 +44,6 @@ def get_time_until_next_daily():
     if now > posting:
         posting = posting.shift(days=1)
     return (posting - now).total_seconds()
-
 
 
 while True:
