@@ -5,10 +5,10 @@ from ics.timeline import Timeline
 import arrow
 import requests
 
-from telegram import send_message, get_updates
+from telegram import send_message, get_updates, pin_chat_message, unpin_chat_message
 from event_message_formatting import format_events_to_message
 from secret import calendar_url, tg_chat
-from config import tz
+from config import tz, pin_schedule
 
 # iCalendar
 
@@ -35,10 +35,28 @@ def send_schedule_for_day_in(days):
 
     if not events:
         print('No events for tomorrow, skipping messge')
+        if pin_schedule:
+            response = unpin_chat_message(tg_chat)
+            if response['ok']:
+                print('Unpinned previous message.')
+            else:
+                print('Failed to unpin the previous message.')
+
     else:
         message = format_events_to_message(events, tomorrow_begin)
-        send_message(tg_chat, message)
-        print('Sent schedule to the group', tg_chat)
+        response = send_message(tg_chat, message)
+        if response['ok']:
+            print('Successfully sent schedule to the group', tg_chat)
+            message_id = response['result']['message_id']
+            if pin_schedule:
+                response = pin_chat_message(tg_chat, message_id, True)
+                if response['ok']:
+                    print('Pinned the schedule.')
+                else:
+                    print('Failed to pin the schedule.')
+        else:
+            print('Failed to send message to the group.')
+            print(repr(response))
 
 def send_schedule_for_tomorrow():
     send_schedule_for_day_in(1)
