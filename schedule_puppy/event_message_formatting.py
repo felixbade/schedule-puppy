@@ -1,6 +1,6 @@
 import datetime
 
-from config import tz
+from schedule_puppy.config import tz
 
 
 def format_events_to_message(events, reference_day):

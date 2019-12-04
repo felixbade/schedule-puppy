@@ -5,10 +5,10 @@ from ics.timeline import Timeline
 import arrow
 import requests
 
-from telegram import send_message, get_updates, pin_chat_message, unpin_chat_message
-from event_message_formatting import format_events_to_message
+from schedule_puppy.telegram import send_message, get_updates, pin_chat_message, unpin_chat_message
+from schedule_puppy.event_message_formatting import format_events_to_message
+from schedule_puppy.config import tz, pin_schedule
 from secret import calendar_url, tg_chat
-from config import tz, pin_schedule
 
 # iCalendar
 

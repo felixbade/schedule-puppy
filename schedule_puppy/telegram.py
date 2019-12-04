@@ -1,4 +1,5 @@
 import requests
+
 from secret import tg_token
 
 def get_updates(offset):
