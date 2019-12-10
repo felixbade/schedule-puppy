@@ -12,13 +12,23 @@ from secret import calendar_url, tg_chat
 
 # iCalendar
 
-def get_events_between(tomorrow_begin, tomorrow_end):
+def get_timeline():
     calendar = Calendar(requests.get(calendar_url).text)
+    return Timeline(calendar)
+
+def filter_events_happening_between(timeline, range_begin, range_end):
     events = []
-    for event in Timeline(calendar):
-        starts_tomorrow = ((event.begin >= tomorrow_begin) and (event.begin < tomorrow_end))
-        #ends_tomorrow = ((event.end > tomorrow_begin) and (event.end <= tomorrow_end))
-        if starts_tomorrow:
+    for event in timeline:
+        happens_in_range = ((event.begin < range_end) and (event.end > range_begin))
+        if happens_in_range:
+            events.append(event)
+    return events
+
+def filter_events_starting_between(timeline, range_begin, range_end):
+    events = []
+    for event in timeline:
+        starts_in_range = ((event.begin >= range_begin) and (event.begin < range_end))
+        if starts_in_range:
             events.append(event)
     return events
 
@@ -31,10 +41,12 @@ def send_schedule_for_day_in(days):
     tomorrow_begin = now.replace(hour=0, minute=0, second=0, microsecond=0).shift(days=days)
     tomorrow_end = tomorrow_begin.shift(days=1)
 
-    events = get_events_between(tomorrow_begin, tomorrow_end)
+    timeline = get_timeline()
+    events = filter_events_happening_between(timeline, tomorrow_begin, tomorrow_end)
+    events_starting_tomorrow = filter_events_starting_between(timeline, tomorrow_begin, tomorrow_end)
 
-    if not events:
-        print('No events for tomorrow, skipping messge')
+    if not events_starting_tomorrow:
+        print('No events starting tomorrow, skipping messge')
         if pin_schedule:
             response = unpin_chat_message(tg_chat)
             if response['ok']:
