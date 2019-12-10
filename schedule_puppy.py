@@ -38,14 +38,14 @@ def filter_events_starting_between(timeline, range_begin, range_end):
 
 def send_schedule_for_day_in(days):
     now = arrow.now(tz)
-    tomorrow_begin = now.replace(hour=0, minute=0, second=0, microsecond=0).shift(days=days)
-    tomorrow_end = tomorrow_begin.shift(days=1)
+    day_begin = now.replace(hour=0, minute=0, second=0, microsecond=0).shift(days=days)
+    day_end = day_begin.shift(days=1)
 
     timeline = get_timeline()
-    events = filter_events_happening_between(timeline, tomorrow_begin, tomorrow_end)
-    events_starting_tomorrow = filter_events_starting_between(timeline, tomorrow_begin, tomorrow_end)
+    events = filter_events_happening_between(timeline, day_begin, day_end)
+    events_starting_on = filter_events_starting_between(timeline, day_begin, day_end)
 
-    if not events_starting_tomorrow:
+    if not events_starting_on:
         print('No events starting tomorrow, skipping messge')
         if pin_schedule:
             response = unpin_chat_message(tg_chat)
@@ -55,7 +55,7 @@ def send_schedule_for_day_in(days):
                 print('Failed to unpin the previous message.')
 
     else:
-        message = format_events_to_message(events, tomorrow_begin)
+        message = format_events_to_message(events, day_begin)
         response = send_message(tg_chat, message)
         if response['ok']:
             print('Successfully sent schedule to the group', tg_chat)
