@@ -44,6 +44,7 @@ def send_schedule_for_day_in(days):
     timeline = get_timeline()
     events = filter_events_happening_between(timeline, day_begin, day_end)
     events_starting_on = filter_events_starting_between(timeline, day_begin, day_end)
+    events = events_starting_on # DIRTY TEMPORARY FIX FOR #12
 
     if not events_starting_on:
         print('No events starting tomorrow, skipping messge')
