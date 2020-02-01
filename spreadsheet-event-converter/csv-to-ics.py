@@ -20,19 +20,24 @@ def to_date(txt):
     year = int(a[2])
     return date(year, month, day)
 
-with open(argv[1], newline='') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=';')
-    rows = list(spamreader)
+with open(argv[1], newline='', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',')
+    rows = list(reader)
     header_row = rows[0]
     rows_with_titles = []
     for row in rows[1:]:
+        if all(cell == '' for cell in row):
+            continue
         row_with_titles = {}
         for title, cell in zip(rows[0], row):
             row_with_titles.update({title: cell})
         rows_with_titles.append(row_with_titles)
 
     for row in rows_with_titles:
-        day = to_date(row['Day'])
+        day = int(row['Day'])
+        month = int(row['Month'])
+        year = int(row['Year'])
+        event_date = date(year, month, day)
         start_time = to_time(row['Start time'])
         end_time = to_time(row['End time'])
 
@@ -40,8 +45,8 @@ with open(argv[1], newline='') as csvfile:
         location = row['Location'] or None
         description = row['Additional info'] or None
 
-        event = create_event2(name, day, start_time, end_time, location, description)
-        print(event)
+        event = create_event2(name, event_date, start_time, end_time, location, description)
+        #print(event)
 
         calendar.add_component(event)
 
@@ -50,3 +55,4 @@ with open(argv[1], newline='') as csvfile:
 # time(18, 0, 0, tzinfo=pytz.timezone('Europe/Helsinki'))
 
 save_calendar(calendar, 'export.ics')
+print('Saved conversion to export.ics.')
