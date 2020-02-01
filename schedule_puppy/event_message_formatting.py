@@ -76,7 +76,7 @@ def event_timespan_to_tg(event, reference_day):
             # Thu 13:00 – Fri 16:00
             begin_s = begin_date + ' ' + begin_time
             end_s = end_date + ' ' + end_time
-            return begin_s + ' – ' + ens_s
+            return begin_s + ' – ' + end_s
 
 
 def time_of(time):
